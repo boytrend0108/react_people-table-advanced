@@ -1,4 +1,5 @@
 import { Person } from '../types';
+import { Parents } from '../types/Parents';
 import { PersonItem } from './PersonItem';
 
 type Props = {
@@ -7,6 +8,13 @@ type Props = {
 
 /* eslint-disable jsx-a11y/control-has-associated-label */
 export const PeopleTable: React.FC<Props> = ({ people }) => {
+  function findParents(person: Person): Parents {
+    return {
+      father: people.find(item => person.fatherName === item.name) || null,
+      mother: people.find(item => person.motherName === item.name) || null,
+    };
+  }
+
   return (
     <table
       data-cy="peopleTable"
@@ -64,9 +72,13 @@ export const PeopleTable: React.FC<Props> = ({ people }) => {
       </thead>
 
       <tbody>
-        {people.map(
-          person => <PersonItem key={person.slug} person={person} />,
-        )}
+        {people.map(person => (
+          <PersonItem
+            key={person.slug}
+            person={person}
+            parents={findParents(person)}
+          />
+        ))}
       </tbody>
 
     </table>
