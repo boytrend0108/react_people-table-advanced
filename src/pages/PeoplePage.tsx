@@ -6,6 +6,8 @@ import { PeopleTable } from '../components/PeopleTable';
 import { getPeople } from '../api';
 import { Person } from '../types';
 
+type SortParams = keyof Person | null;
+
 export const PeoplePage = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,19 +27,45 @@ export const PeoplePage = () => {
     const sex = searchParams.get('sex');
     const centuries = searchParams.getAll('century');
     const query = searchParams.get('query')?.toLowerCase() || '';
+    const sort = searchParams.get('sort') as SortParams;
+    const order = searchParams.get('order');
 
-    return initialPeople.filter(person => {
+    const filteredPeople = initialPeople.filter(person => {
       const matchSex = !sex || person.sex === sex;
+
       const matchCentury
         = !centuries.length
         || centuries.includes(person.born.toString().slice(0, 2));
+
       const matchQuery
-         = person.name.toLowerCase().includes(query)
+        = person.name.toLowerCase().includes(query)
         || person.motherName?.toLowerCase().includes(query)
         || person.fatherName?.toLowerCase().includes(query);
 
       return matchQuery && matchCentury && matchSex;
     });
+
+    if (sort) {
+      const sortedPeople = filteredPeople
+        .sort((person1: Person, person2: Person) => {
+          const value1 = person1[sort];
+          const value2 = person2[sort];
+
+          if (typeof value1 === 'string' && typeof value2 === 'string') {
+            return value1.toLowerCase().localeCompare(value2.toLowerCase());
+          }
+
+          if (typeof value1 === 'number' && typeof value2 === 'number') {
+            return value1 - value2;
+          }
+
+          return 0;
+        });
+
+      return order ? sortedPeople.reverse() : sortedPeople;
+    }
+
+    return filteredPeople;
   }
 
   const preparedPeople = getPreparedPeople(people);

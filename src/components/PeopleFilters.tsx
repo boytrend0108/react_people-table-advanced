@@ -100,7 +100,7 @@ export const PeopleFilters = () => {
               sex: null,
               century: null,
               query: null,
-            }),
+            }, searchParams),
           }}
         >
           Reset all filters

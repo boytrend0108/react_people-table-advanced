@@ -1,6 +1,9 @@
+import { Link, useSearchParams } from 'react-router-dom';
 import { Person } from '../types';
 import { Parents } from '../types/Parents';
 import { PersonItem } from './PersonItem';
+import { getSearchWith } from '../utils/searchHelper';
+import { MySortArrow } from './UI/MySortArrow';
 
 type Props = {
   people: Person[];
@@ -8,11 +11,27 @@ type Props = {
 
 /* eslint-disable jsx-a11y/control-has-associated-label */
 export const PeopleTable: React.FC<Props> = ({ people }) => {
+  const [searchParams] = useSearchParams();
+  const sort = searchParams.get('sort');
+  const order = searchParams.get('order');
+
   function findParents(person: Person): Parents {
     return {
       father: people.find(item => person.fatherName === item.name) || null,
       mother: people.find(item => person.motherName === item.name) || null,
     };
+  }
+
+  function setFiltersParams(filter: string): string {
+    if (filter !== sort) {
+      return getSearchWith({ sort: filter, order: null }, searchParams);
+    }
+
+    if (filter === sort && order) {
+      return getSearchWith({ sort: null, order: null }, searchParams);
+    }
+
+    return getSearchWith({ order: 'desc' }, searchParams);
   }
 
   return (
@@ -25,44 +44,60 @@ export const PeopleTable: React.FC<Props> = ({ people }) => {
           <th>
             <span className="is-flex is-flex-wrap-nowrap">
               Name
-              <a href="#/people?sort=name">
+              <Link
+                to={{
+                  search: setFiltersParams('name'),
+                }}
+              >
                 <span className="icon">
-                  <i className="fas fa-sort" />
+                  <MySortArrow order={order} sort={sort} name="name" />
                 </span>
-              </a>
+              </Link>
             </span>
           </th>
 
           <th>
             <span className="is-flex is-flex-wrap-nowrap">
               Sex
-              <a href="#/people?sort=sex">
+              <Link
+                to={{
+                  search: setFiltersParams('sex'),
+                }}
+              >
                 <span className="icon">
-                  <i className="fas fa-sort" />
+                  <MySortArrow order={order} sort={sort} name="sex" />
                 </span>
-              </a>
+              </Link>
             </span>
           </th>
 
           <th>
             <span className="is-flex is-flex-wrap-nowrap">
               Born
-              <a href="#/people?sort=born&amp;order=desc">
+              <Link
+                to={{
+                  search: setFiltersParams('born'),
+                }}
+              >
                 <span className="icon">
-                  <i className="fas fa-sort-up" />
+                  <MySortArrow order={order} sort={sort} name="born" />
                 </span>
-              </a>
+              </Link>
             </span>
           </th>
 
           <th>
             <span className="is-flex is-flex-wrap-nowrap">
               Died
-              <a href="#/people?sort=died">
+              <Link
+                to={{
+                  search: setFiltersParams('died'),
+                }}
+              >
                 <span className="icon">
-                  <i className="fas fa-sort" />
+                  <MySortArrow order={order} sort={sort} name="died" />
                 </span>
-              </a>
+              </Link>
             </span>
           </th>
 
