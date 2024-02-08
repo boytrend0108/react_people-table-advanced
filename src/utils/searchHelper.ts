@@ -10,8 +10,9 @@ export function getSearchWith(
 ): string {
   const newParams = new URLSearchParams(currentSearch);
 
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [key, value] of Object.entries(params)) {
+  Object.entries(params).forEach(el => {
+    const [key, value] = el;
+
     switch (true) {
       case value === null:
         newParams.delete(key);
@@ -19,13 +20,13 @@ export function getSearchWith(
 
       case Array.isArray(value):
         newParams.delete(key);
-        value.forEach(item => newParams.append(key, item.toString()));
+        value.forEach((item: Param) => newParams.append(key, item.toString()));
         break;
 
       default:
         newParams.set(key, value.toString());
     }
-  }
+  });
 
   return newParams.toString();
 }

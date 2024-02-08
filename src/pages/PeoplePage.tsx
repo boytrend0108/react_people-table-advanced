@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { PeopleFilters } from '../components/PeopleFilters';
 import { Loader } from '../components/Loader';
@@ -9,6 +10,7 @@ export const PeoplePage = () => {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     getPeople()
@@ -17,7 +19,28 @@ export const PeoplePage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const preparedPeople = [...people];
+  function getPreparedPeople(
+    initialPeople: Person[],
+  ): Person[] {
+    const sex = searchParams.get('sex');
+    const centuries = searchParams.getAll('century');
+    const query = searchParams.get('query')?.toLowerCase() || '';
+
+    return initialPeople.filter(person => {
+      const matchSex = !sex || person.sex === sex;
+      const matchCentury
+        = !centuries.length
+        || centuries.includes(person.born.toString().slice(0, 2));
+      const matchQuery
+         = person.name.toLowerCase().includes(query)
+        || person.motherName?.toLowerCase().includes(query)
+        || person.fatherName?.toLowerCase().includes(query);
+
+      return matchQuery && matchCentury && matchSex;
+    });
+  }
+
+  const preparedPeople = getPreparedPeople(people);
 
   return (
     <>
@@ -39,7 +62,7 @@ export const PeoplePage = () => {
                       ? (
                         <p data-cy="peopleLoadingError">Something went wrong</p>
                       )
-                      : (<PeopleTable people={people} />)}
+                      : (<PeopleTable people={preparedPeople} />)}
                   </>
                 )}
 
